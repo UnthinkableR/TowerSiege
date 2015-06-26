@@ -26,20 +26,15 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
 public class Main extends JavaPlugin implements Listener{
-static ArrayList<String> Count = new ArrayList<String>();
-static ArrayList<String> Time = new ArrayList<String>();
-static ArrayList<String> Min = new ArrayList<String>();
-static ArrayList<Player> Bar = new ArrayList<Player>();
-static ArrayList<Player> Def = new ArrayList<Player>();
-static ArrayList<String> Done = new ArrayList<String>();
 static Collection<Player> Game1 = new ArrayList<Player>();
+
 
 	
 	public void onEnable(){
 		for(Player players : Bukkit.getOnlinePlayers()){
 		Game1.add(players);
 		}
-		StartGame(Game1, 2);
+		StartGame(Game1);
 		getServer().getPluginManager().registerEvents(this, this);
 	}
 	
@@ -54,9 +49,11 @@ static Collection<Player> Game1 = new ArrayList<Player>();
 		return false;
 	  }
 	
-	private static final List<String> frames = Arrays.asList(ChatColor.GOLD + String.valueOf(ChatColor.BOLD) + "Development",//
-            ChatColor.GREEN + String.valueOf(ChatColor.BOLD) + "Development", 
-            ChatColor.RED + String.valueOf(ChatColor.BOLD) + "Development");
+	private static final List<String> frames = Arrays.asList(String.valueOf(Format("&3&lNestMC")),
+			String.valueOf(Format("&3&lNestMC")), String.valueOf(Format("&f&lN&3&lestMC")),
+			String.valueOf(Format("&f&lNe&3&lstMC")), String.valueOf(Format("&f&lNes&3&ltMC")),
+			String.valueOf(Format("&f&lNest&3&lMC")), String.valueOf(Format("&f&lNestM&3&lC")),
+			String.valueOf(Format("&f&lNestMC")), String.valueOf(Format("&f&lNestMC")));
 
     private static final Map<String, Integer> taskIds = new HashMap<>();
 
@@ -64,25 +61,42 @@ static Collection<Player> Game1 = new ArrayList<Player>();
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        Scoreboard newScoreboard = getServer().getScoreboardManager().getNewScoreboard();
-        e.getPlayer().setScoreboard(newScoreboard);
-        final Objective mainObjective = newScoreboard.registerNewObjective("main", "dummy");
-        mainObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
-        mainObjective.setDisplayName(frames.get(0));
-        mainObjective.getScore(ChatColor.GOLD + "Coins: ").setScore(420);
-        taskIds.put(e.getPlayer().getName(), new BukkitRunnable() {
-            int frame = 0;
-
-            public void run() {
-                frame++;
-                if (frame == frames.size()) {
-                    frame = 0;
-                }
-                mainObjective.setDisplayName(frames.get(frame));
-            }
-        }.runTaskTimer(this, 0L, 10L).getTaskId());
+       
     }
 
+  
+    
+    public void StartGame(final Collection<Player> players){
+    	Integer GameSize = players.size();
+    		for(Player p : players){     		
+    			Scoreboard newScoreboard = getServer().getScoreboardManager().getNewScoreboard();
+    	        p.setScoreboard(newScoreboard);
+    	        final Objective mainObjective = newScoreboard.registerNewObjective("game", "dummy");
+    	        TeamBal.Balance(players);
+    	        Integer c = (GameSize / 2);
+    	        mainObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
+    	        mainObjective.setDisplayName(frames.get(0));
+    	        mainObjective.getScore(Format("&e&lTime:")).setScore(7);
+    	        mainObjective.getScore(Format("0:00")).setScore(6);    	       
+    	        mainObjective.getScore(Format("&b&lDefenders")).setScore(5);
+    	        mainObjective.getScore(Format("&3" + c)).setScore(4);
+    	        mainObjective.getScore(Format("&c&lBarbarians")).setScore(3);
+    	        mainObjective.getScore(Format("&4" + c)).setScore(2);
+    	        mainObjective.getScore(ChatColor.RED.toString()).setScore(6);
+    	        mainObjective.getScore(Format("--------------")).setScore(1);
+    	        taskIds.put(p.getName(), new BukkitRunnable() {
+    	            int frame = 0;
+    	            public void run() {
+    	                frame++;
+    	                if (frame == frames.size()) {
+    	                    frame = 0;
+    	                }
+    	                mainObjective.setDisplayName(frames.get(frame));
+    	            }
+    	        }.runTaskTimer(this, 100, 05).getTaskId());
+    	}    	
+    }
+	
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
         Integer id = taskIds.remove(e.getPlayer().getName());
@@ -90,18 +104,10 @@ static Collection<Player> Game1 = new ArrayList<Player>();
             getServer().getScheduler().cancelTask(id);
         }
     }
-
 	
-	public void StartGame(Collection<Player> players, Integer size){
-		for(Player p : players){
-			this.StartTheGame(p, size);
-		}
-	}
-	
-	
-	
-	public String Format(String text){
+	public static String Format(String text){
 		return text.replaceAll("&", "§");
 	}
+
 	
 }
